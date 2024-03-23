@@ -35,5 +35,10 @@
     "ts-node": "^10.9.1",
     "tsc": "^2.0.4",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^12.17.0",
+    "@google-cloud/storage": "^7.9.0",
+    "aws-sdk": "^2.1584.0"
   }
 }

@@ -1,4 +1,4 @@
-import { FileFlexClient } from "../index";
+import { FileFlexClient } from '../index';
 
 test('FileFlexClient constructor', () => {
   const fileFlexClient = new FileFlexClient();
