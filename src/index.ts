@@ -19,7 +19,7 @@ export class FileFlexClient {
 
   private AZURE_CONTAINER_NAME;
 
-  private IN_MEMORY;
+  private LOCAL;
 
   constructor(params: FileFlexClientConstructorDto) {
     this.AWS_BUCKET_NAME = params?.AWS_BUCKET_NAME;
@@ -27,11 +27,11 @@ export class FileFlexClient {
     this.AWS_SECRET_ACCESS_KEY = params?.AWS_SECRET_ACCESS_KEY;
     this.AZURE_CONNECTION_STRING = params?.AZURE_CONNECTION_STRING;
     this.AZURE_CONTAINER_NAME = params?.AZURE_CONTAINER_NAME;
-    this.IN_MEMORY = params?.IN_MEMORY;
+    this.LOCAL = params?.LOCAL;
   }
 
   private _detectProvider(): Provider {
-    if (this.IN_MEMORY) {
+    if (this.LOCAL) {
       return "LocalStorage";
     }
 
@@ -74,8 +74,8 @@ export class FileFlexClient {
         await azureProvider.save(key, fileContent.toString());
         break;
       case "LocalStorage":
-        if (!this.IN_MEMORY) {
-          throw new Error("IN_MEMORY must be true");
+        if (!this.LOCAL) {
+          throw new Error("LOCAL must be true");
         }
 
         const localStorageProvider = new LocalStorageProvider();
@@ -110,8 +110,8 @@ export class FileFlexClient {
 
         return await azureProvider.retrieve(key);
       case "LocalStorage":
-        if (!this.IN_MEMORY) {
-          throw new Error("IN_MEMORY must be true");
+        if (!this.LOCAL) {
+          throw new Error("LOCAL must be true");
         }
 
         const localStorageProvider = new LocalStorageProvider();
@@ -148,8 +148,8 @@ export class FileFlexClient {
         await azureProvider.delete(key);
         break;
       case "LocalStorage":
-        if (!this.IN_MEMORY) {
-          throw new Error("IN_MEMORY must be true");
+        if (!this.LOCAL) {
+          throw new Error("LOCAL must be true");
         }
 
         const localStorageProvider = new LocalStorageProvider();
@@ -185,8 +185,8 @@ export class FileFlexClient {
 
         return await azureProvider.list();
       case "LocalStorage":
-        if (!this.IN_MEMORY) {
-          throw new Error("IN_MEMORY must be true");
+        if (!this.LOCAL) {
+          throw new Error("LOCAL must be true");
         }
 
         const localStorageProvider = new LocalStorageProvider();

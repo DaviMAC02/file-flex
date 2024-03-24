@@ -4,7 +4,7 @@ type FileFlexClientConstructorDto = {
   AWS_SECRET_ACCESS_KEY?: string;
   AZURE_CONNECTION_STRING?: string;
   AZURE_CONTAINER_NAME?: string;
-  IN_MEMORY?: boolean;
+  LOCAL?: boolean;
 }
 
 /**
@@ -18,7 +18,7 @@ declare class FileFlexClient {
     private AWS_SECRET_ACCESS_KEY;
     private AZURE_CONNECTION_STRING;
     private AZURE_CONTAINER_NAME;
-    private IN_MEMORY;
+    private LOCAL;
     constructor(params: FileFlexClientConstructorDto);
     private _detectProvider;
     upload(fileContent: Buffer, key: string): Promise<void>;

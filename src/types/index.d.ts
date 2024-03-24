@@ -46,5 +46,5 @@ export type FileFlexClientConstructorDto = {
   AWS_SECRET_ACCESS_KEY?: string;
   AZURE_CONNECTION_STRING?: string;
   AZURE_CONTAINER_NAME?: string;
-  IN_MEMORY?: boolean;
+  LOCAL?: boolean;
 }

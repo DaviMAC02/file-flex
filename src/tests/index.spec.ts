@@ -8,18 +8,18 @@ dotenv.config({
 describe("FileFlexClient", () => {
   describe("localStorage", () => {
     it("should detect LocalStorage provider", () => {
-      const client = new FileFlexClient({ IN_MEMORY: true });
+      const client = new FileFlexClient({ LOCAL: true });
       expect(client["_detectProvider"]()).toBe("LocalStorage");
     });
 
     it("should upload a file", async () => {
-      const client = new FileFlexClient({ IN_MEMORY: true });
+      const client = new FileFlexClient({ LOCAL: true });
       await client.upload(Buffer.from("hello"), "file.txt");
       await client.delete("file.txt");
     });
 
     it("should download a file", async () => {
-      const client = new FileFlexClient({ IN_MEMORY: true });
+      const client = new FileFlexClient({ LOCAL: true });
       await client.upload(Buffer.from("hello"), "file.txt");
       const fileContent = await client.download("file.txt");
       expect(fileContent).toBe("hello");
@@ -27,7 +27,7 @@ describe("FileFlexClient", () => {
     });
 
     it("should list files", async () => {
-      const client = new FileFlexClient({ IN_MEMORY: true });
+      const client = new FileFlexClient({ LOCAL: true });
       await client.upload(Buffer.from("hello"), "file.txt");
       const files = await client.list();
       expect(files).toContain("file.txt");
@@ -35,7 +35,7 @@ describe("FileFlexClient", () => {
     });
 
     it("should delete a file", async () => {
-      const client = new FileFlexClient({ IN_MEMORY: true });
+      const client = new FileFlexClient({ LOCAL: true });
       await client.upload(Buffer.from("hello"), "file.txt");
       await client.delete("file.txt");
       const files = await client.list();
