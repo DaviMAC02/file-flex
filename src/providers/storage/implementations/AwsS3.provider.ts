@@ -6,8 +6,13 @@ export class AwsStorageProvider implements IStorageProvider {
   private s3: S3;
   private bucketName: string;
 
-  constructor(bucketName: string) {
-    this.s3 = new AWS.S3();
+  constructor(bucketName: string, accessKey: string, secretAccessKey: string) {
+    this.s3 = new S3({
+      credentials: {
+        accessKeyId: accessKey,
+        secretAccessKey,
+      },
+    })
     this.bucketName = bucketName;
   }
 

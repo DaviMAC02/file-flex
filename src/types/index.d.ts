@@ -4,7 +4,7 @@ import { AwsClientConstructorDto } from "./providers/aws/aws";
  * @enum Provider
  * @description Represents the available providers for FileFlex.
  */
-export type Provider = "AWS" | "Azure" | "GCP" | "InMemory";
+export type Provider = "AWS" | "Azure" | "LocalStorage";
 
 /**
  * @interface IFileFlexClient
@@ -44,8 +44,9 @@ export interface IFileFlexClient {
 
 export type FileFlexClientConstructorDto = {
   AWS_BUCKET_NAME?: string;
+  AWS_ACCESS_KEY?: string;
+  AWS_SECRET_ACCESS_KEY?: string;
   AZURE_CONNECTION_STRING?: string;
   AZURE_CONTAINER_NAME?: string;
-  GCP_BUCKET_NAME?: string;
   IN_MEMORY?: boolean;
 }
