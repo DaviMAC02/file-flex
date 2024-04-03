@@ -48,5 +48,6 @@ export type FileFlexClientConstructorDto = {
   AZURE_CONTAINER_NAME?: string;
   GOOGLE_CLOUD_BUCKET_NAME?: string;
   GOOGLE_CLOUD_PROJECT_ID?: string;
+  GOOGLE_CLOUD_KEY_FILENAME?: string;
   LOCAL?: boolean;
 }

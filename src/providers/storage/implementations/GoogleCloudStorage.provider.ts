@@ -5,8 +5,8 @@ export class GoogleCloudStorageProvider implements IStorageProvider {
   private storage: Storage;
   private bucketName: string;
 
-  constructor(projectId: string, bucketName: string) {
-    this.storage = new Storage({ projectId });
+  constructor(projectId: string, bucketName: string, keyFilename: string = "") {
+    this.storage = new Storage({ projectId, ...keyFilename && { keyFilename } });
     this.bucketName = bucketName;
   }
 
@@ -17,12 +17,23 @@ export class GoogleCloudStorageProvider implements IStorageProvider {
       .save(value);
   }
   async retrieve(key: string): Promise<string> {
-    throw new Error("Method not implemented.");
+    const data = await this.storage
+      .bucket(this.bucketName)
+      .file(key)
+      .download();
+    return data.toString();
   }
   async list(): Promise<(string | undefined)[] | undefined> {
-    throw new Error("Method not implemented.");
+    const data = await this.storage
+      .bucket(this.bucketName)
+      .getFiles();
+
+    return data[0].map((file) => file.name) || [];
   }
   async delete(key: string): Promise<void> {
-    throw new Error("Method not implemented.");
+    await this.storage
+      .bucket(this.bucketName)
+      .file(key)
+      .delete();
   }
 }

@@ -24,6 +24,8 @@ export class FileFlexClient {
 
   private GOOGLE_CLOUD_PROJECT_ID;
 
+  private GOOGLE_CLOUD_KEY_FILENAME;
+
   private LOCAL;
 
   constructor(params: FileFlexClientConstructorDto) {
@@ -34,6 +36,7 @@ export class FileFlexClient {
     this.AZURE_CONTAINER_NAME = params?.AZURE_CONTAINER_NAME;
     this.GOOGLE_CLOUD_BUCKET_NAME = params?.GOOGLE_CLOUD_BUCKET_NAME;
     this.GOOGLE_CLOUD_PROJECT_ID = params?.GOOGLE_CLOUD_PROJECT_ID;
+    this.GOOGLE_CLOUD_KEY_FILENAME = params?.GOOGLE_CLOUD_KEY_FILENAME;
     this.LOCAL = params?.LOCAL;
   }
 
@@ -85,10 +88,18 @@ export class FileFlexClient {
         await azureProvider.save(key, fileContent.toString());
         break;
       case "GoogleCloud":
+        
+        if (!this.GOOGLE_CLOUD_PROJECT_ID) {
+          throw new Error("GOOGLE_CLOUD_PROJECT_ID is required");
+        }
+        
         if (!this.GOOGLE_CLOUD_BUCKET_NAME) {
           throw new Error("GOOGLE_CLOUD_BUCKET_NAME is required");
         }
-        const googleCloudProvider = new GoogleCloudStorageProvider(this.GOOGLE_CLOUD_PROJECT_ID, this.GOOGLE_CLOUD_BUCKET_NAME);
+        const googleCloudProvider = new GoogleCloudStorageProvider(this.GOOGLE_CLOUD_PROJECT_ID, this.GOOGLE_CLOUD_BUCKET_NAME, this.GOOGLE_CLOUD_KEY_FILENAME);
+
+        await googleCloudProvider.save(key, fileContent.toString());
+        break;
       case "LocalStorage":
         if (!this.LOCAL) {
           throw new Error("LOCAL must be true");
@@ -125,6 +136,18 @@ export class FileFlexClient {
         );
 
         return await azureProvider.retrieve(key);
+
+      case "GoogleCloud":
+        if (!this.GOOGLE_CLOUD_PROJECT_ID) {
+          throw new Error("GOOGLE_CLOUD_PROJECT_ID is required");
+        }
+        
+        if (!this.GOOGLE_CLOUD_BUCKET_NAME) {
+          throw new Error("GOOGLE_CLOUD_BUCKET_NAME is required");
+        }
+        const googleCloudProvider = new GoogleCloudStorageProvider(this.GOOGLE_CLOUD_PROJECT_ID, this.GOOGLE_CLOUD_BUCKET_NAME, this.GOOGLE_CLOUD_KEY_FILENAME);
+
+        return await googleCloudProvider.retrieve(key);
       case "LocalStorage":
         if (!this.LOCAL) {
           throw new Error("LOCAL must be true");
@@ -163,6 +186,18 @@ export class FileFlexClient {
 
         await azureProvider.delete(key);
         break;
+      case "GoogleCloud":
+        if (!this.GOOGLE_CLOUD_PROJECT_ID) {
+          throw new Error("GOOGLE_CLOUD_PROJECT_ID is required");
+        }
+        
+        if (!this.GOOGLE_CLOUD_BUCKET_NAME) {
+          throw new Error("GOOGLE_CLOUD_BUCKET_NAME is required");
+        }
+        const googleCloudProvider = new GoogleCloudStorageProvider(this.GOOGLE_CLOUD_PROJECT_ID, this.GOOGLE_CLOUD_BUCKET_NAME, this.GOOGLE_CLOUD_KEY_FILENAME);
+
+        await googleCloudProvider.delete(key);
+        break;
       case "LocalStorage":
         if (!this.LOCAL) {
           throw new Error("LOCAL must be true");
@@ -200,6 +235,17 @@ export class FileFlexClient {
         );
 
         return await azureProvider.list();
+      case "GoogleCloud":
+        if (!this.GOOGLE_CLOUD_PROJECT_ID) {
+          throw new Error("GOOGLE_CLOUD_PROJECT_ID is required");
+        }
+        
+        if (!this.GOOGLE_CLOUD_BUCKET_NAME) {
+          throw new Error("GOOGLE_CLOUD_BUCKET_NAME is required");
+        }
+        const googleCloudProvider = new GoogleCloudStorageProvider(this.GOOGLE_CLOUD_PROJECT_ID, this.GOOGLE_CLOUD_BUCKET_NAME, this.GOOGLE_CLOUD_KEY_FILENAME);
+
+        return await googleCloudProvider.list();
       case "LocalStorage":
         if (!this.LOCAL) {
           throw new Error("LOCAL must be true");
