@@ -1,3 +1,5 @@
 node_modules
-.env.test.file-flex
 dist
+.env.test
+.file-flex
+*.tgz
