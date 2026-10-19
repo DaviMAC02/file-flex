@@ -1,7 +1,7 @@
 // Runs against the built package (`npm test` builds first), so it checks exactly what gets published.
 import { after, describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -109,6 +109,23 @@ describe("FileFlexClient", () => {
     await assert.rejects(local().download("../../etc/passwd"), /invalid key/);
     await assert.rejects(local().delete("/etc/hosts"), /invalid key/);
   });
+
+  it(
+    "does not follow a symlink inside the storage folder to files outside it",
+    { skip: process.platform === "win32" },
+    async () => {
+      const outside = mkdtempSync(path.join(tmpdir(), "file-flex-outside-"));
+      writeFileSync(path.join(outside, "secret.txt"), "secret");
+      symlinkSync(outside, path.join(localRoot, "link"));
+      try {
+        await assert.rejects(local().download("link/secret.txt"), /invalid key/);
+        await assert.rejects(local().upload(Buffer.from("x"), "link/planted.txt"), /invalid key/);
+      } finally {
+        rmSync(path.join(localRoot, "link"));
+        rmSync(outside, { recursive: true, force: true });
+      }
+    },
+  );
 
   it("lists nothing for a folder that does not exist yet", async () => {
     const client = new FileFlexClient({ LOCAL: true, LOCAL_PATH: path.join(localRoot, "never-created") });

@@ -17,6 +17,7 @@
 - Binary files (images, PDFs) were corrupted on upload by every provider.
 - Azure sized uploads by character count, truncating non-ASCII text.
 - Local keys like `../../etc/passwd` could read and write outside the storage folder.
+- A symlink inside the local storage folder could be used to read or write files outside it.
 - Local keys with folders (`docs/a.txt`) failed to upload, and `list()` returned folder names.
 - `list()` on S3 stopped at 1,000 files.
 - Missing files threw on some providers and returned `undefined` on others. Now `download()` returns `undefined` and `delete()` is a no-op everywhere.
