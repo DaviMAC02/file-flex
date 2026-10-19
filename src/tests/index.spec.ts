@@ -22,8 +22,16 @@ describe("FileFlexClient", () => {
       const client = new FileFlexClient({ LOCAL: true });
       await client.upload(Buffer.from("hello"), "file.txt");
       const fileContent = await client.download("file.txt");
-      expect(fileContent).toBe("hello");
+      expect(fileContent?.toString()).toBe("hello");
       await client.delete("file.txt");
+    });
+
+    it("should round-trip binary content unchanged", async () => {
+      const client = new FileFlexClient({ LOCAL: true });
+      const bytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x00, 0xff, 0xfe, 0x80]);
+      await client.upload(bytes, "image.png");
+      expect((await client.download("image.png"))?.equals(bytes)).toBe(true);
+      await client.delete("image.png");
     });
 
     it("should list files", async () => {
@@ -43,7 +51,7 @@ describe("FileFlexClient", () => {
     });
   });
 
-  describe("AZURE", () => {
+  (process.env.AZURE_CONNECTION_STRING ? describe : describe.skip)("AZURE", () => {
     it("should detect Azure provider", () => {
       const client = new FileFlexClient({
         AZURE_CONNECTION_STRING: process.env.AZURE_CONNECTION_STRING,
@@ -68,7 +76,7 @@ describe("FileFlexClient", () => {
       });
       await client.upload(Buffer.from("hello"), "file.txt");
       const fileContent = await client.download("file.txt");
-      expect(fileContent).toBe("hello");
+      expect(fileContent?.toString()).toBe("hello");
       await client.delete("file.txt");
     });
 
@@ -95,7 +103,7 @@ describe("FileFlexClient", () => {
     });
   });
 
-  describe("AWS", () => {
+  (process.env.AWS_BUCKET_NAME ? describe : describe.skip)("AWS", () => {
     it("should detect AWS provider", () => {
       const client = new FileFlexClient({
         AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,
@@ -123,7 +131,7 @@ describe("FileFlexClient", () => {
       });
       await client.upload(Buffer.from("hello"), "file.txt");
       const fileContent = await client.download("file.txt");
-      expect(fileContent).toBe("hello");
+      expect(fileContent?.toString()).toBe("hello");
       await client.delete("file.txt");
     });
 

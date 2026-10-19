@@ -1,4 +1,3 @@
-import * as AWS from "aws-sdk";
 import { S3 } from "aws-sdk";
 import { IStorageProvider } from "../interfaces/IStorageProvider";
 
@@ -16,7 +15,7 @@ export class AwsStorageProvider implements IStorageProvider {
     this.bucketName = bucketName;
   }
 
-  async save(key: string, value: string): Promise<void> {
+  async save(key: string, value: Buffer): Promise<void> {
     await this.s3
       .putObject({
         Bucket: this.bucketName,
@@ -26,7 +25,7 @@ export class AwsStorageProvider implements IStorageProvider {
       .promise();
   }
 
-  async retrieve(key: string): Promise<string | undefined> {
+  async retrieve(key: string): Promise<Buffer | undefined> {
     const data = await this.s3
       .getObject({
         Bucket: this.bucketName,
@@ -34,7 +33,7 @@ export class AwsStorageProvider implements IStorageProvider {
       })
       .promise();
 
-    return data?.Body?.toString();
+    return data.Body as Buffer | undefined;
   }
 
   async list(): Promise<(string | undefined)[] | undefined> {

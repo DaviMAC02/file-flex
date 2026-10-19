@@ -22,7 +22,7 @@ export interface IFileFlexClient {
    * @param {string} key
    * @returns {Buffer}
    */
-  async download(provider: Provider, key: string): Promise<Buffer>;
+  async download(provider: Provider, key: string): Promise<Buffer | undefined>;
 
   /**
    * @method delete
@@ -50,4 +50,5 @@ export type FileFlexClientConstructorDto = {
   GOOGLE_CLOUD_PROJECT_ID?: string;
   GOOGLE_CLOUD_KEY_FILENAME?: string;
   LOCAL?: boolean;
+  LOCAL_PATH?: string;
 }

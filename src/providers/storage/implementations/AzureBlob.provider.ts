@@ -10,18 +10,12 @@ export class AzureStorageProvider implements IStorageProvider {
     this.containerClient = blobServiceClient.getContainerClient(containerName);
   }
 
-  async save(key: string, value: string): Promise<void> {
-    const blockBlobClient = this.containerClient.getBlockBlobClient(key);
-    await blockBlobClient.upload(value, value.length);
+  async save(key: string, value: Buffer): Promise<void> {
+    await this.containerClient.getBlockBlobClient(key).uploadData(value);
   }
 
-  async retrieve(key: string): Promise<string> {
-    const blockBlobClient = this.containerClient.getBlockBlobClient(key);
-    const downloadBlockBlobResponse = await blockBlobClient.download(0);
-    const data = await streamToString(
-      downloadBlockBlobResponse.readableStreamBody
-    );
-    return data;
+  async retrieve(key: string): Promise<Buffer> {
+    return this.containerClient.getBlockBlobClient(key).downloadToBuffer();
   }
 
   async list(): Promise<(string | undefined)[] | undefined> {
@@ -37,19 +31,4 @@ export class AzureStorageProvider implements IStorageProvider {
     const blockBlobClient = this.containerClient.getBlockBlobClient(key);
     await blockBlobClient.delete();
   }
-}
-
-async function streamToString(
-  readableStream: NodeJS.ReadableStream | undefined
-): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: string[] = [];
-    readableStream?.on("data", (data) => {
-      chunks.push(data.toString());
-    });
-    readableStream?.on("end", () => {
-      resolve(chunks.join(""));
-    });
-    readableStream?.on("error", reject);
-  });
 }

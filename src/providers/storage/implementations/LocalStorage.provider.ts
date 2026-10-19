@@ -2,12 +2,13 @@ import { IStorageProvider } from "../interfaces/IStorageProvider";
 import fs from 'fs';
 
 export class LocalStorageProvider implements IStorageProvider {
-  private localStorage = 'src/storage/localStorage';
-  async save(key: string, value: string): Promise<void> {
+  constructor(private localStorage: string = '.file-flex') {}
+
+  async save(key: string, value: Buffer): Promise<void> {
     await this._writeFile(key, value);
   }
 
-  async retrieve(key: string): Promise<string | undefined> {
+  async retrieve(key: string): Promise<Buffer | undefined> {
     try {
       return await this._readFile(key);
     } catch (err) {
@@ -16,20 +17,21 @@ export class LocalStorageProvider implements IStorageProvider {
   }
 
   async list(): Promise<string[]> {
-    const files = await fs.promises.readdir(this.localStorage);
-    return files;
+    await fs.promises.mkdir(this.localStorage, { recursive: true });
+    return fs.promises.readdir(this.localStorage);
   }
 
   async delete(key: string): Promise<void> {
     await this._deleteFile(key);
   }
 
-  private async _writeFile(key: string, value: string): Promise<void> {
+  private async _writeFile(key: string, value: Buffer): Promise<void> {
+    await fs.promises.mkdir(this.localStorage, { recursive: true });
     await fs.promises.writeFile(`${this.localStorage}/${key}`, value);
   }
 
-  private async _readFile(key: string): Promise<string> {
-    return await fs.promises.readFile(`${this.localStorage}/${key}`, 'utf-8');
+  private async _readFile(key: string): Promise<Buffer> {
+    return await fs.promises.readFile(`${this.localStorage}/${key}`);
   }
 
   private async _deleteFile(key: string): Promise<void> {
