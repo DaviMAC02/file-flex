@@ -50,4 +50,5 @@ export type FileFlexClientConstructorDto = {
   GOOGLE_CLOUD_PROJECT_ID?: string;
   GOOGLE_CLOUD_KEY_FILENAME?: string;
   LOCAL?: boolean;
+  LOCAL_PATH?: string;
 }

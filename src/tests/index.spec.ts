@@ -43,7 +43,7 @@ describe("FileFlexClient", () => {
     });
   });
 
-  describe("AZURE", () => {
+  (process.env.AZURE_CONNECTION_STRING ? describe : describe.skip)("AZURE", () => {
     it("should detect Azure provider", () => {
       const client = new FileFlexClient({
         AZURE_CONNECTION_STRING: process.env.AZURE_CONNECTION_STRING,
@@ -95,7 +95,7 @@ describe("FileFlexClient", () => {
     });
   });
 
-  describe("AWS", () => {
+  (process.env.AWS_BUCKET_NAME ? describe : describe.skip)("AWS", () => {
     it("should detect AWS provider", () => {
       const client = new FileFlexClient({
         AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,

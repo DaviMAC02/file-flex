@@ -1,18 +1,10 @@
-
 # file-flex
 
-FileFlex is a versatile package designed to abstract file operations across various cloud providers, making your project cloud-agnostic. With FileFlex, you can effortlessly switch between cloud storage providers like Azure and AWS without changing your codebase. It's perfect for applications that need the flexibility to work with different storage solutions or for developers looking to build cloud-independent applications.
+[![npm](https://img.shields.io/npm/v/file-flex)](https://www.npmjs.com/package/file-flex)
+[![CI](https://github.com/DaviMAC02/file-flex/actions/workflows/ci.yml/badge.svg)](https://github.com/DaviMAC02/file-flex/actions/workflows/ci.yml)
+[![license](https://img.shields.io/github/license/DaviMAC02/file-flex)](LICENSE)
 
-## Features
-
-- **Cloud Agnostic**: Easily switch between cloud storage providers.
-- **Support for Azure and AWS**: Seamless integration with Azure Blob Storage and Amazon S3.
-- **Local Storage Support**: Includes a local storage option for development, testing, or debugging purposes.
-- **Environment Variable Integration**: Leverages environment variables for secure credential management.
-
-## Installation
-
-To install FileFlex, run the following command in your project directory:
+One file storage API for Node.js across **AWS S3**, **Azure Blob Storage**, **Google Cloud Storage** and **local disk**. Switch providers by changing config, not code.
 
 ```bash
 npm install file-flex
@@ -20,50 +12,54 @@ npm install file-flex
 
 ## Usage
 
-### Importing FileFlexClient
+```ts
+import { FileFlexClient } from "file-flex";
 
-Start by importing `FileFlexClient` from the `file-flex` package:
+const storage = new FileFlexClient({ LOCAL: true });
 
-```javascript
-import { FileFlexClient } from 'file-flex';
+await storage.upload(Buffer.from("hello"), "greeting.txt");
+await storage.download("greeting.txt"); // "hello"
+await storage.list();                   // ["greeting.txt"]
+await storage.delete("greeting.txt");
 ```
 
-### Configuration
+The provider is picked from the options you pass:
 
-FileFlex allows you to configure clients for Azure, AWS, or local storage based on your needs. Below are examples of how to set up each type of client.
+| Provider | Options |
+|---|---|
+| Local disk | `LOCAL: true`, optional `LOCAL_PATH` (default `.file-flex`) |
+| AWS S3 | `AWS_BUCKET_NAME`, `AWS_ACCESS_KEY`, `AWS_SECRET_ACCESS_KEY` |
+| Azure Blob | `AZURE_CONNECTION_STRING`, `AZURE_CONTAINER_NAME` |
+| Google Cloud | `GOOGLE_CLOUD_PROJECT_ID`, `GOOGLE_CLOUD_BUCKET_NAME`, optional `GOOGLE_CLOUD_KEY_FILENAME` |
 
-#### Azure Blob Storage
+A typical setup uses local disk in development and a cloud bucket in production:
 
-```javascript
-const client = new FileFlexClient({
-  AZURE_CONNECTION_STRING: process.env.AZURE_CONNECTION_STRING,
-  AZURE_CONTAINER_NAME: process.env.AZURE_CONTAINER_NAME,
-});
+```ts
+const storage = new FileFlexClient(
+  process.env.NODE_ENV === "production"
+    ? { AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME, AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY }
+    : { LOCAL: true },
+);
 ```
 
-#### Amazon S3
+## How it works
 
-```javascript
-const client = new FileFlexClient({
-  AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,
-  AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY,
-  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
-});
+Every backend implements the same four-method `IStorageProvider` interface (`save`, `retrieve`, `list`, `delete`), and `FileFlexClient` picks the implementation from its options. Adding a provider means adding one class in `src/providers/storage/implementations/`.
+
+## Limitations
+
+Files are stored and returned as UTF-8 strings, so binary content (images, PDFs) is not supported yet.
+
+## Development
+
+```bash
+npm install
+npm test        # local provider tests; cloud suites run when their env vars are set
+npm run build
 ```
 
-#### Local Storage (No Provider)
-
-For development, testing, or debugging purposes, you might want to use local storage. This requires no external provider setup:
-
-```javascript
-const client = new FileFlexClient({ LOCAL: true });
-```
-
-## Contributing
-
-We welcome contributions to the FileFlex project.
-[File Flex Repository](https://github.com/DaviMAC02/file-flex)
+Copy `.env.test.example` to `.env.test` and fill in credentials to run the cloud suites. Contributions are welcome.
 
 ## License
 
-FileFlex is licensed under MIT License, see the LICENSE file for details.
+[MIT](LICENSE)

@@ -1,9 +1,9 @@
 {
   "name": "file-flex",
   "version": "1.0.1",
-  "description": "Universal File Handler",
+  "description": "Cloud-agnostic file storage for Node.js: one API for AWS S3, Azure Blob, Google Cloud Storage and local disk",
   "main": "dist/index.js",
-  "repository": "git@github.com:DaviMAC02/file-flex.git",
+  "repository": "https://github.com/DaviMAC02/file-flex",
   "author": "Davi Martini Agrello Cintra <davi.cintra2002@gmail.com>",
   "license": "MIT",
   "scripts": {
@@ -12,7 +12,8 @@
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "prettier": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "prettier:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
-    "test": "jest --watch"
+    "test": "jest",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
@@ -32,7 +33,6 @@
     "prettier": "^3.1.0",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
-    "tsc": "^2.0.4",
     "tsup": "^8.0.2",
     "typescript": "^5.3.3"
   },
@@ -40,5 +40,16 @@
     "@azure/storage-blob": "^12.17.0",
     "@google-cloud/storage": "^7.9.0",
     "aws-sdk": "^2.1584.0"
-  }
+  },
+  "homepage": "https://github.com/DaviMAC02/file-flex#readme",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "storage",
+    "s3",
+    "azure-blob",
+    "google-cloud-storage",
+    "cloud-agnostic"
+  ]
 }

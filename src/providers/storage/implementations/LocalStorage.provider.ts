@@ -2,7 +2,8 @@ import { IStorageProvider } from "../interfaces/IStorageProvider";
 import fs from 'fs';
 
 export class LocalStorageProvider implements IStorageProvider {
-  private localStorage = 'src/storage/localStorage';
+  constructor(private localStorage: string = '.file-flex') {}
+
   async save(key: string, value: string): Promise<void> {
     await this._writeFile(key, value);
   }
@@ -16,8 +17,8 @@ export class LocalStorageProvider implements IStorageProvider {
   }
 
   async list(): Promise<string[]> {
-    const files = await fs.promises.readdir(this.localStorage);
-    return files;
+    await fs.promises.mkdir(this.localStorage, { recursive: true });
+    return fs.promises.readdir(this.localStorage);
   }
 
   async delete(key: string): Promise<void> {
@@ -25,6 +26,7 @@ export class LocalStorageProvider implements IStorageProvider {
   }
 
   private async _writeFile(key: string, value: string): Promise<void> {
+    await fs.promises.mkdir(this.localStorage, { recursive: true });
     await fs.promises.writeFile(`${this.localStorage}/${key}`, value);
   }
 

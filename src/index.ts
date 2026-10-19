@@ -7,253 +7,69 @@ import { AwsStorageProvider } from "./providers/storage/implementations/AwsS3.pr
 import { AzureStorageProvider } from "./providers/storage/implementations/AzureBlob.provider";
 import { GoogleCloudStorageProvider } from "./providers/storage/implementations/GoogleCloudStorage.provider";
 import { LocalStorageProvider } from "./providers/storage/implementations/LocalStorage.provider";
+import { IStorageProvider } from "./providers/storage/interfaces/IStorageProvider";
 import { FileFlexClientConstructorDto, Provider } from "./types";
 
 export class FileFlexClient {
-  private AWS_BUCKET_NAME;
-
-  private AWS_ACCESS_KEY;
-
-  private AWS_SECRET_ACCESS_KEY;
-
-  private AZURE_CONNECTION_STRING;
-
-  private AZURE_CONTAINER_NAME;
-
-  private GOOGLE_CLOUD_BUCKET_NAME;
-
-  private GOOGLE_CLOUD_PROJECT_ID;
-
-  private GOOGLE_CLOUD_KEY_FILENAME;
-
-  private LOCAL;
+  private params: FileFlexClientConstructorDto;
 
   constructor(params: FileFlexClientConstructorDto) {
-    this.AWS_BUCKET_NAME = params?.AWS_BUCKET_NAME;
-    this.AWS_ACCESS_KEY = params?.AWS_ACCESS_KEY;
-    this.AWS_SECRET_ACCESS_KEY = params?.AWS_SECRET_ACCESS_KEY;
-    this.AZURE_CONNECTION_STRING = params?.AZURE_CONNECTION_STRING;
-    this.AZURE_CONTAINER_NAME = params?.AZURE_CONTAINER_NAME;
-    this.GOOGLE_CLOUD_BUCKET_NAME = params?.GOOGLE_CLOUD_BUCKET_NAME;
-    this.GOOGLE_CLOUD_PROJECT_ID = params?.GOOGLE_CLOUD_PROJECT_ID;
-    this.GOOGLE_CLOUD_KEY_FILENAME = params?.GOOGLE_CLOUD_KEY_FILENAME;
-    this.LOCAL = params?.LOCAL;
+    this.params = params ?? {};
   }
 
   private _detectProvider(): Provider {
-    if (this.LOCAL) {
+    const p = this.params;
+
+    if (p.LOCAL) {
       return "LocalStorage";
     }
 
-    if (this.AWS_BUCKET_NAME && this.AWS_ACCESS_KEY && this.AWS_SECRET_ACCESS_KEY) {
+    if (p.AWS_BUCKET_NAME && p.AWS_ACCESS_KEY && p.AWS_SECRET_ACCESS_KEY) {
       return "AWS";
     }
 
-    if (this.AZURE_CONNECTION_STRING && this.AZURE_CONTAINER_NAME) {
+    if (p.AZURE_CONNECTION_STRING && p.AZURE_CONTAINER_NAME) {
       return "Azure";
     }
 
-    if (this.GOOGLE_CLOUD_PROJECT_ID) {
+    if (p.GOOGLE_CLOUD_PROJECT_ID) {
       return "GoogleCloud";
     }
 
     throw new Error("No provider found");
   }
 
-  public async upload(fileContent: Buffer, key: string): Promise<void> {
-    const provider = this._detectProvider();
+  private _provider(): IStorageProvider {
+    const p = this.params;
 
-    switch (provider) {
+    switch (this._detectProvider()) {
       case "AWS":
-        if (!this.AWS_BUCKET_NAME) {
-          throw new Error("AWS_BUCKET_NAME is required");
-        }
-
-        const awsProvider = new AwsStorageProvider(this.AWS_BUCKET_NAME!, this.AWS_ACCESS_KEY!, this.AWS_SECRET_ACCESS_KEY!);
-
-        await awsProvider.save(key, fileContent.toString());
-        break;
+        return new AwsStorageProvider(p.AWS_BUCKET_NAME!, p.AWS_ACCESS_KEY!, p.AWS_SECRET_ACCESS_KEY!);
       case "Azure":
-        if (!this.AZURE_CONNECTION_STRING || !this.AZURE_CONTAINER_NAME) {
-          throw new Error(
-            "AZURE_CONNECTION_STRING and AZURE_CONTAINER_NAME are required"
-          );
-        }
-
-        const azureProvider = new AzureStorageProvider(
-          this.AZURE_CONNECTION_STRING!,
-          this.AZURE_CONTAINER_NAME!
-        );
-
-        await azureProvider.save(key, fileContent.toString());
-        break;
+        return new AzureStorageProvider(p.AZURE_CONNECTION_STRING!, p.AZURE_CONTAINER_NAME!);
       case "GoogleCloud":
-        
-        if (!this.GOOGLE_CLOUD_PROJECT_ID) {
-          throw new Error("GOOGLE_CLOUD_PROJECT_ID is required");
-        }
-        
-        if (!this.GOOGLE_CLOUD_BUCKET_NAME) {
+        if (!p.GOOGLE_CLOUD_BUCKET_NAME) {
           throw new Error("GOOGLE_CLOUD_BUCKET_NAME is required");
         }
-        const googleCloudProvider = new GoogleCloudStorageProvider(this.GOOGLE_CLOUD_PROJECT_ID, this.GOOGLE_CLOUD_BUCKET_NAME, this.GOOGLE_CLOUD_KEY_FILENAME);
-
-        await googleCloudProvider.save(key, fileContent.toString());
-        break;
+        return new GoogleCloudStorageProvider(p.GOOGLE_CLOUD_PROJECT_ID!, p.GOOGLE_CLOUD_BUCKET_NAME, p.GOOGLE_CLOUD_KEY_FILENAME);
       case "LocalStorage":
-        if (!this.LOCAL) {
-          throw new Error("LOCAL must be true");
-        }
-
-        const localStorageProvider = new LocalStorageProvider();
-        await localStorageProvider.save(key, fileContent.toString());
-        break;
+        return new LocalStorageProvider(p.LOCAL_PATH);
     }
+  }
+
+  public async upload(fileContent: Buffer, key: string): Promise<void> {
+    await this._provider().save(key, fileContent.toString());
   }
 
   public async download(key: string): Promise<string | undefined> {
-    const provider = this._detectProvider();
-
-    switch (provider) {
-      case "AWS":
-        if (!this.AWS_BUCKET_NAME) {
-          throw new Error("AWS_BUCKET_NAME is required");
-        }
-
-        const awsProvider = new AwsStorageProvider(this.AWS_BUCKET_NAME!, this.AWS_ACCESS_KEY!, this.AWS_SECRET_ACCESS_KEY!);
-
-        return await awsProvider.retrieve(key);
-      case "Azure":
-        if (!this.AZURE_CONNECTION_STRING || !this.AZURE_CONTAINER_NAME) {
-          throw new Error(
-            "AZURE_CONNECTION_STRING and AZURE_CONTAINER_NAME are required"
-          );
-        }
-
-        const azureProvider = new AzureStorageProvider(
-          this.AZURE_CONNECTION_STRING!,
-          this.AZURE_CONTAINER_NAME!
-        );
-
-        return await azureProvider.retrieve(key);
-
-      case "GoogleCloud":
-        if (!this.GOOGLE_CLOUD_PROJECT_ID) {
-          throw new Error("GOOGLE_CLOUD_PROJECT_ID is required");
-        }
-        
-        if (!this.GOOGLE_CLOUD_BUCKET_NAME) {
-          throw new Error("GOOGLE_CLOUD_BUCKET_NAME is required");
-        }
-        const googleCloudProvider = new GoogleCloudStorageProvider(this.GOOGLE_CLOUD_PROJECT_ID, this.GOOGLE_CLOUD_BUCKET_NAME, this.GOOGLE_CLOUD_KEY_FILENAME);
-
-        return await googleCloudProvider.retrieve(key);
-      case "LocalStorage":
-        if (!this.LOCAL) {
-          throw new Error("LOCAL must be true");
-        }
-
-        const localStorageProvider = new LocalStorageProvider();
-
-        return await localStorageProvider.retrieve(key);
-    }
+    return this._provider().retrieve(key);
   }
 
   public async delete(key: string): Promise<void> {
-    const provider = this._detectProvider();
-
-    switch (provider) {
-      case "AWS":
-        if (!this.AWS_BUCKET_NAME) {
-          throw new Error("AWS_BUCKET_NAME is required");
-        }
-
-        const awsProvider = new AwsStorageProvider(this.AWS_BUCKET_NAME!, this.AWS_ACCESS_KEY!, this.AWS_SECRET_ACCESS_KEY!);
-
-        await awsProvider.delete(key);
-        break;
-      case "Azure":
-        if (!this.AZURE_CONNECTION_STRING || !this.AZURE_CONTAINER_NAME) {
-          throw new Error(
-            "AZURE_CONNECTION_STRING and AZURE_CONTAINER_NAME are required"
-          );
-        }
-
-        const azureProvider = new AzureStorageProvider(
-          this.AZURE_CONNECTION_STRING!,
-          this.AZURE_CONTAINER_NAME!
-        );
-
-        await azureProvider.delete(key);
-        break;
-      case "GoogleCloud":
-        if (!this.GOOGLE_CLOUD_PROJECT_ID) {
-          throw new Error("GOOGLE_CLOUD_PROJECT_ID is required");
-        }
-        
-        if (!this.GOOGLE_CLOUD_BUCKET_NAME) {
-          throw new Error("GOOGLE_CLOUD_BUCKET_NAME is required");
-        }
-        const googleCloudProvider = new GoogleCloudStorageProvider(this.GOOGLE_CLOUD_PROJECT_ID, this.GOOGLE_CLOUD_BUCKET_NAME, this.GOOGLE_CLOUD_KEY_FILENAME);
-
-        await googleCloudProvider.delete(key);
-        break;
-      case "LocalStorage":
-        if (!this.LOCAL) {
-          throw new Error("LOCAL must be true");
-        }
-
-        const localStorageProvider = new LocalStorageProvider();
-
-        await localStorageProvider.delete(key);
-        break;
-    }
+    await this._provider().delete(key);
   }
 
   public async list(): Promise<(string | undefined)[] | undefined> {
-    const provider = this._detectProvider();
-
-    switch (provider) {
-      case "AWS":
-        if (!this.AWS_BUCKET_NAME) {
-          throw new Error("AWS_BUCKET_NAME is required");
-        }
-
-        const awsProvider = new AwsStorageProvider(this.AWS_BUCKET_NAME!, this.AWS_ACCESS_KEY!, this.AWS_SECRET_ACCESS_KEY!);
-
-        return await awsProvider.list();
-      case "Azure":
-        if (!this.AZURE_CONNECTION_STRING || !this.AZURE_CONTAINER_NAME) {
-          throw new Error(
-            "AZURE_CONNECTION_STRING and AZURE_CONTAINER_NAME are required"
-          );
-        }
-
-        const azureProvider = new AzureStorageProvider(
-          this.AZURE_CONNECTION_STRING!,
-          this.AZURE_CONTAINER_NAME!
-        );
-
-        return await azureProvider.list();
-      case "GoogleCloud":
-        if (!this.GOOGLE_CLOUD_PROJECT_ID) {
-          throw new Error("GOOGLE_CLOUD_PROJECT_ID is required");
-        }
-        
-        if (!this.GOOGLE_CLOUD_BUCKET_NAME) {
-          throw new Error("GOOGLE_CLOUD_BUCKET_NAME is required");
-        }
-        const googleCloudProvider = new GoogleCloudStorageProvider(this.GOOGLE_CLOUD_PROJECT_ID, this.GOOGLE_CLOUD_BUCKET_NAME, this.GOOGLE_CLOUD_KEY_FILENAME);
-
-        return await googleCloudProvider.list();
-      case "LocalStorage":
-        if (!this.LOCAL) {
-          throw new Error("LOCAL must be true");
-        }
-
-        const localStorageProvider = new LocalStorageProvider();
-
-        return await localStorageProvider.list();
-    }
+    return this._provider().list();
   }
 }
