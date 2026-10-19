@@ -1,55 +1,79 @@
 {
   "name": "file-flex",
   "version": "2.0.0",
-  "description": "Cloud-agnostic file storage for Node.js: one API for AWS S3, Azure Blob, Google Cloud Storage and local disk",
-  "main": "dist/index.js",
-  "repository": "https://github.com/DaviMAC02/file-flex",
-  "author": "Davi Martini Agrello Cintra <davi.cintra2002@gmail.com>",
-  "license": "MIT",
-  "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --sourcemap --legacy-output --minify --clean",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "prettier": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
-    "prettier:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
-    "test": "jest",
-    "prepublishOnly": "npm run build"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.5.11",
-    "@typescript-eslint/eslint-plugin": "^6.13.2",
-    "@typescript-eslint/parser": "^6.13.2",
-    "dotenv": "^16.4.5",
-    "eslint": "^8.55.0",
-    "eslint-config-airbnb": "^19.0.4",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.29.0",
-    "eslint-plugin-jsx-a11y": "^6.8.0",
-    "eslint-plugin-prettier": "^5.0.1",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "jest": "^29.7.0",
-    "nodemon": "^3.0.2",
-    "prettier": "^3.1.0",
-    "ts-jest": "^29.1.1",
-    "ts-node": "^10.9.1",
-    "tsup": "^8.0.2",
-    "typescript": "^5.3.3"
-  },
-  "dependencies": {
-    "@azure/storage-blob": "^12.17.0",
-    "@google-cloud/storage": "^7.9.0",
-    "aws-sdk": "^2.1584.0"
-  },
-  "homepage": "https://github.com/DaviMAC02/file-flex#readme",
-  "files": [
-    "dist"
-  ],
+  "description": "One storage API for Node.js across AWS S3, Azure Blob Storage, Google Cloud Storage and local disk",
   "keywords": [
     "storage",
+    "file-storage",
     "s3",
     "azure-blob",
     "google-cloud-storage",
-    "cloud-agnostic"
-  ]
+    "gcs",
+    "cloud-agnostic",
+    "typescript"
+  ],
+  "homepage": "https://github.com/DaviMAC02/file-flex#readme",
+  "bugs": "https://github.com/DaviMAC02/file-flex/issues",
+  "repository": "https://github.com/DaviMAC02/file-flex",
+  "license": "MIT",
+  "author": "Davi Martini Agrello Cintra <davi.cintra2002@gmail.com>",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --sourcemap --clean --target node20",
+    "prettier": "prettier --write src test",
+    "prettier:check": "prettier --check src test",
+    "test": "npm run build && node --test test/client.test.mjs",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "emulators:start": "docker run -d --rm --name ff-s3 -p 9090:9090 adobe/s3mock && docker run -d --rm --name ff-azurite -p 10000:10000 mcr.microsoft.com/azure-storage/azurite azurite-blob --blobHost 0.0.0.0 --loose --skipApiVersionCheck && docker run -d --rm --name ff-gcs -p 4443:4443 fsouza/fake-gcs-server -scheme http -port 4443 -public-host localhost:4443",
+    "emulators:stop": "docker rm -f ff-s3 ff-azurite ff-gcs",
+    "test:emulators": "npm run build && node --env-file=test/emulators.env test/setup-emulators.mjs && node --env-file=test/emulators.env --test test/client.test.mjs"
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-s3": "^3.400.0",
+    "@azure/storage-blob": "^12.17.0",
+    "@google-cloud/storage": "^7.9.0 || ^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@aws-sdk/client-s3": {
+      "optional": true
+    },
+    "@azure/storage-blob": {
+      "optional": true
+    },
+    "@google-cloud/storage": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1153.0",
+    "@azure/storage-blob": "^12.34.0",
+    "@google-cloud/storage": "^8.4.0",
+    "@types/node": "^20.19.43",
+    "prettier": "^3.9.10",
+    "tsup": "^8.5.1",
+    "typescript": "~5.9.3"
+  }
 }

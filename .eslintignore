@@ -1,4 +1,0 @@
-// Configuration files
-jest.config.js
-**/client/**
-dist
