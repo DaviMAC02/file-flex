@@ -4,11 +4,11 @@ import fs from 'fs';
 export class LocalStorageProvider implements IStorageProvider {
   constructor(private localStorage: string = '.file-flex') {}
 
-  async save(key: string, value: string): Promise<void> {
+  async save(key: string, value: Buffer): Promise<void> {
     await this._writeFile(key, value);
   }
 
-  async retrieve(key: string): Promise<string | undefined> {
+  async retrieve(key: string): Promise<Buffer | undefined> {
     try {
       return await this._readFile(key);
     } catch (err) {
@@ -25,13 +25,13 @@ export class LocalStorageProvider implements IStorageProvider {
     await this._deleteFile(key);
   }
 
-  private async _writeFile(key: string, value: string): Promise<void> {
+  private async _writeFile(key: string, value: Buffer): Promise<void> {
     await fs.promises.mkdir(this.localStorage, { recursive: true });
     await fs.promises.writeFile(`${this.localStorage}/${key}`, value);
   }
 
-  private async _readFile(key: string): Promise<string> {
-    return await fs.promises.readFile(`${this.localStorage}/${key}`, 'utf-8');
+  private async _readFile(key: string): Promise<Buffer> {
+    return await fs.promises.readFile(`${this.localStorage}/${key}`);
   }
 
   private async _deleteFile(key: string): Promise<void> {

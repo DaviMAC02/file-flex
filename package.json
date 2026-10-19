@@ -1,6 +1,6 @@
 {
   "name": "file-flex",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Cloud-agnostic file storage for Node.js: one API for AWS S3, Azure Blob, Google Cloud Storage and local disk",
   "main": "dist/index.js",
   "repository": "https://github.com/DaviMAC02/file-flex",

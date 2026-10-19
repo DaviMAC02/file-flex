@@ -18,7 +18,7 @@ import { FileFlexClient } from "file-flex";
 const storage = new FileFlexClient({ LOCAL: true });
 
 await storage.upload(Buffer.from("hello"), "greeting.txt");
-await storage.download("greeting.txt"); // "hello"
+await storage.download("greeting.txt"); // <Buffer 68 65 6c 6c 6f>
 await storage.list();                   // ["greeting.txt"]
 await storage.delete("greeting.txt");
 ```
@@ -46,9 +46,11 @@ const storage = new FileFlexClient(
 
 Every backend implements the same four-method `IStorageProvider` interface (`save`, `retrieve`, `list`, `delete`), and `FileFlexClient` picks the implementation from its options. Adding a provider means adding one class in `src/providers/storage/implementations/`.
 
-## Limitations
+Files are stored as raw bytes, so images, PDFs and any other binary content round-trip unchanged.
 
-Files are stored and returned as UTF-8 strings, so binary content (images, PDFs) is not supported yet.
+## Upgrading from 1.x
+
+`download()` now returns a `Buffer` instead of a string. Call `.toString()` on the result where you need text. In 1.x, binary files were corrupted on upload, so re-upload any binary files stored with 1.x.
 
 ## Development
 

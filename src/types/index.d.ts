@@ -22,7 +22,7 @@ export interface IFileFlexClient {
    * @param {string} key
    * @returns {Buffer}
    */
-  async download(provider: Provider, key: string): Promise<Buffer>;
+  async download(provider: Provider, key: string): Promise<Buffer | undefined>;
 
   /**
    * @method delete

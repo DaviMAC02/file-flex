@@ -10,18 +10,18 @@ export class GoogleCloudStorageProvider implements IStorageProvider {
     this.bucketName = bucketName;
   }
 
-  async save(key: string, value: string): Promise<void> {
+  async save(key: string, value: Buffer): Promise<void> {
     await this.storage
       .bucket(this.bucketName)
       .file(key)
       .save(value);
   }
-  async retrieve(key: string): Promise<string> {
-    const data = await this.storage
+  async retrieve(key: string): Promise<Buffer> {
+    const [data] = await this.storage
       .bucket(this.bucketName)
       .file(key)
       .download();
-    return data.toString();
+    return data;
   }
   async list(): Promise<(string | undefined)[] | undefined> {
     const data = await this.storage

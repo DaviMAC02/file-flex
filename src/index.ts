@@ -58,10 +58,10 @@ export class FileFlexClient {
   }
 
   public async upload(fileContent: Buffer, key: string): Promise<void> {
-    await this._provider().save(key, fileContent.toString());
+    await this._provider().save(key, fileContent);
   }
 
-  public async download(key: string): Promise<string | undefined> {
+  public async download(key: string): Promise<Buffer | undefined> {
     return this._provider().retrieve(key);
   }
 
